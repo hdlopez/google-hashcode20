@@ -1,4 +1,4 @@
-package practice;
+package com.withgoogle.alpacas.practice;
 
 import java.io.BufferedWriter;
 import java.io.IOException;

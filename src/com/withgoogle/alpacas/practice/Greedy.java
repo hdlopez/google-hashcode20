@@ -1,4 +1,4 @@
-package practice;
+package com.withgoogle.alpacas.practice;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -6,7 +6,7 @@ import java.io.OutputStreamWriter;
 import java.util.*;
 
 /**
- * Greedy solution
+ * com.withgoogle.alpacas.practice.Greedy solution
  */
 public class Greedy {
     public static ArrayList<String> greedySolution(int maxSlices, int pizzasQty, int[] pizzas) {
@@ -51,31 +51,35 @@ public class Greedy {
 
     private static final Scanner scanner = new Scanner(System.in);
 
-    public static void main(String[] args) throws IOException {
-        BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(System.out));
+    public static void main(String[] args) {
+        try {
+            BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(System.out));
 
-        int maxSlices = scanner.nextInt();
-        scanner.skip("(\r\n|[\n\r\u2028\u2029\u0085])?");
+            int maxSlices = scanner.nextInt();
+            scanner.skip("(\r\n|[\n\r\u2028\u2029\u0085])?");
 
-        int pizzasQty = scanner.nextInt();
-        int[] pizzas = new int[pizzasQty];
-        scanner.skip("(\r\n|[\n\r\u2028\u2029\u0085])?");
+            int pizzasQty = scanner.nextInt();
+            int[] pizzas = new int[pizzasQty];
+            scanner.skip("(\r\n|[\n\r\u2028\u2029\u0085])?");
 
-        String[] pizzaLine = scanner.nextLine().split(" ");
-        for (int i = 0; i < pizzaLine.length; i++) {
-            pizzas[i] = Integer.parseInt(pizzaLine[i]);
+            String[] pizzaLine = scanner.nextLine().split(" ");
+            for (int i = 0; i < pizzaLine.length; i++) {
+                pizzas[i] = Integer.parseInt(pizzaLine[i]);
+            }
+            Arrays.sort(pizzas);
+
+            ArrayList<String> result = greedySolution(maxSlices, pizzasQty, pizzas);
+
+            bufferedWriter.write(String.valueOf(result.size()));
+            bufferedWriter.newLine();
+            bufferedWriter.write(String.join(" ", result));
+            bufferedWriter.newLine();
+
+            bufferedWriter.close();
+
+            scanner.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        Arrays.sort(pizzas);
-
-        ArrayList<String> result = greedySolution(maxSlices, pizzasQty, pizzas);
-
-        bufferedWriter.write(String.valueOf(result.size()));
-        bufferedWriter.newLine();
-        bufferedWriter.write(String.join(" ", result));
-        bufferedWriter.newLine();
-
-        bufferedWriter.close();
-
-        scanner.close();
     }
 }

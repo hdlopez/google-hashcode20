@@ -1,4 +1,4 @@
-package practice;
+package com.withgoogle.alpacas.practice;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -6,25 +6,18 @@ import java.io.OutputStreamWriter;
 import java.util.*;
 
 /**
- * Recursive solution converted into iteration. It also use a solution "cache" (kind of DM).
- *
- * It works for big solutions but it's still pretty slow
+ * Recursive solution using a solution "cache" (kind of DM). It does not work with big inputs :(
  */
-public class Recursive2 {
+public class Recursive1 {
     static SolutionCache cache;
 
     static class Solution {
         int slicesQty;
         ArrayList<String> order;
 
-        public Solution() {
+        public Solution(){
             slicesQty = 0;
             order = new ArrayList<>();
-        }
-
-        void add(int index, int pizzaSlices) {
-            slicesQty += pizzaSlices;
-            order.add(String.valueOf(index));
         }
 
         Solution cloneAdd(int index, int pizzaSlices) {
@@ -34,73 +27,27 @@ public class Recursive2 {
             s.order.add(String.valueOf(index));
             return s;
         }
-
-        Solution appendSolution(Solution toAppend) {
-            slicesQty += toAppend.slicesQty;
-            order.addAll(toAppend.order);
-            return this;
-        }
     }
 
-    static class SolutionCall {
-        int maxSlices;
-        int index;
-        boolean mustAdd;
+    public static Solution recursiveSolution(int maxSlices, int index, int[] pizzas) {
+        if (index < 0) return new Solution();
+
+        Optional<Solution> cachedSolution = cache.getSolution(index, maxSlices);
+        if (cachedSolution.isPresent()) {
+            return cachedSolution.get();
+        }
+
         Solution solution;
 
-        SolutionCall(int maxSlices, int index, boolean mustAdd) {
-            this.maxSlices = maxSlices;
-            this.index = index;
-            this.mustAdd = mustAdd;
+        int selectedPizza = pizzas[index];
+        if (maxSlices - selectedPizza >= 0) {
+            solution = recursiveSolution(maxSlices - selectedPizza, index - 1, pizzas);
+
+            solution = solution.cloneAdd(index, selectedPizza);
+        } else {
+            solution = recursiveSolution(maxSlices, index - 1, pizzas);
         }
-
-        SolutionCall(int maxSlices, int index, Solution solution) {
-            this.maxSlices = maxSlices;
-            this.index = index;
-            this.solution = solution;
-        }
-    }
-
-    public static Solution iterativeRecursionSolution(int m, int i, int[] pizzas) {
-        Stack<SolutionCall> stack = new Stack<>();
-
-        int index = i;
-        int maxSlices = m;
-        while (index >= 0) {
-            int selectedPizza = pizzas[index];
-
-            Optional<Solution> cachedSolution = cache.getSolution(index, maxSlices);
-            if (cachedSolution.isPresent()) {
-                stack.push(new SolutionCall(maxSlices, index, cachedSolution.get()));
-                break;
-            }
-
-            boolean mustAdd = false;
-            if (maxSlices - selectedPizza >= 0) {
-                maxSlices = maxSlices - selectedPizza;
-                mustAdd = true;
-            }
-            index--;
-            stack.push(new SolutionCall(maxSlices, index, mustAdd));
-        }
-
-        Solution solution = new Solution();
-        while (!stack.empty()) {
-            SolutionCall call = stack.pop();
-            index = call.index + 1;
-            int selectedPizza = pizzas[index];
-
-            if (call.solution != null) {
-                solution.appendSolution(call.solution);
-                break;
-            }
-
-            if (call.mustAdd) {
-                solution.add(index, selectedPizza);
-            }
-
-            cache.saveSolution(index, call.maxSlices + selectedPizza, solution.cloneAdd(0, 0));
-        }
+        cache.saveSolution(index, maxSlices, solution);
 
         return solution;
     }
@@ -116,7 +63,7 @@ public class Recursive2 {
 
         while (!optimal && j != 0) {
 
-            Solution sol = iterativeRecursionSolution(maxSlices, j, pizzas);
+            Solution sol = recursiveSolution(maxSlices, j, pizzas);
 
             if (sol.order.size() == pizzasQty) {
                 // if I am planning to order all the pizzas
@@ -177,9 +124,7 @@ public class Recursive2 {
 
         void saveSolution(int index, int slices, Solution sol) {
             String sliceStr = String.valueOf(slices);
-            if (!items[index].cacheByWeight.containsKey(sliceStr)) {
-                items[index].cacheByWeight.put(sliceStr, sol);
-            }
+            items[index].cacheByWeight.computeIfAbsent(sliceStr, k -> sol);
         }
 
         Optional<Solution> getSolution(int index, int slices) {
@@ -201,6 +146,4 @@ public class Recursive2 {
         }
     }
 }
-
-
 
